@@ -1,0 +1,14 @@
+{
+    "name": "Router Permission Checker",
+    "alias": "router-permission-checker",
+    "description": "",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\RouterPermissionCheckerService\\Providers\\BaseServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
