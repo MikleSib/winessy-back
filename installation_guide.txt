@@ -1,0 +1,101 @@
+необходимо развернуть универсальные нотифаеры по монетам (https://bitbucket.org/excriptoteam/universal_notifier/src/master/)
+
+для каждой из них необходимо создать свою БД, скопировать "заготовку" .env
+
+```cp .env.example .env```
+заполнить кошерными данными подключения к БД и подключения к бирже (см. ниже) и стартануть в контейнере "composer install"
+
+
+
+.env
+есть "общие" настройки:
+```
+COIN_NOTIFIER_TEXCHANGE_HOST=# http://192.168.88.168 собственно IP сервера биржи
+COIN_NOTIFIER_TEXCHANGE_SEND_TRANSACTION_TOKEN=#microkot17 # со стороны биржи в .env в переменной аля BTC_NEW_WITHDRAW_TOKEN
+COIN_NOTIFIER_TEXCHANGE_SEND_TRANSACTION_METODIC=#tcc.withdraw # со стороны биржи в .env в переменной аля BTC_NEW_WITHDRAW_METODIC
+
+COIN_NOTIFIER_TEXCHANGE_DEPOSIT_CREATE_URL=/api/notifier_notification/deposit/create
+COIN_NOTIFIER_TEXCHANGE_DEPOSIT_CREATE_TOKEN=microkot17# со стороны биржи указывается в адмике
+COIN_NOTIFIER_TEXCHANGE_DEPOSIT_CREATE_METODIC=balance.update# со стороны биржи указывается в адмике
+
+COIN_NOTIFIER_TEXCHANGE_TRANSACTION_UPDATE_CONFIRMATIONS_DEPOSIT_URL=/api/notifier_notification/deposit/update_confirmations
+COIN_NOTIFIER_TEXCHANGE_TRANSACTION_UPDATE_CONFIRMATIONS_WITHDRAW_URL=/api/notifier_notification/withdraw/update_confirmations
+COIN_NOTIFIER_TEXCHANGE_TRANSACTION_UPDATE_CONFIRMATIONS_TOKEN=microkot17#на текущий момент жёстко прописаны в коде биржи
+COIN_NOTIFIER_TEXCHANGE_TRANSACTION_UPDATE_CONFIRMATIONS_METODIC=transaction.update_confirmations#на текущий момент жёстко прописаны в коде биржи
+```
+
+по каждой из валют есть "свои" необходимые параметры:
+
+
+- NEXT
+UniversalNotifier:
+имеющийся у меня тоннель: notif_24_next_7078="ssh -f -N -L 192.168.88.168:7078:localhost:7078 devops@116.202.84.169"
+```
+BTC_LIKE_SCHEME=http
+BTC_LIKE_HOST=192.168.88.168
+BTC_LIKE_PORT=7078
+BTC_LIKE_USER=nextcoinus
+BTC_LIKE_PASS=REp9kiUWqMKY9KTndBNE
+
+BTC_LIKE_EXPLORER_HOST=http://explore.next.exchange
+BTC_LIKE_EXPLORER_BALANCE_BY_ADDRESS_URL=/ext/getbalance/__address__
+BTC_LIKE_EXPLORER_BALANCE_BY_ADDRESS_TEMPLATE=__address__
+BTC_LIKE_EXPLORER_BALANCE_BY_ADDRESS_OBJECT_FIELD=null
+BTC_LIKE_EXPLORER_BALANCE_BY_ADDRESS_IS_DECIMAL=true
+
+COIN_NOTIFIER_CURRENCY_ADAPTER=BtcLike
+COIN_NOTIFIER_CURRENCY_TICKER=NEXT
+COIN_NOTIFIER_CURRENCY_DIGITS_AFTER_DECIMAL=18
+COIN_NOTIFIER_CURRENCY_CONFIRMATIONS=40
+```
+Texchange:
+```
+BTC_NEW_WITHDRAW_TOKEN=#см. COIN_NOTIFIER_TEXCHANGE_DEPOSIT_CREATE_TOKEN
+BTC_NEW_WITHDRAW_METODIC=#см. COIN_NOTIFIER_TEXCHANGE_DEPOSIT_CREATE_METODIC
+```
+
+BTC и иные BTC_LIKE валюты - аналогично NEXT-у
+при их подключении - свистите - покажу как заполнять параметры в BTC_LIKE_EXPLORER_ ...
+
+
+
+- XLM (Stellar)
+UniversalNotifier:
+имеющийся у меня тоннель: notif_24_xlm_8084="ssh -f -N -L 192.168.88.168:8084:127.0.0.1:8000 devops@116.202.84.169"
+```
+COIN_NOTIFIER_CURRENCY_ADAPTER=Stellar
+COIN_NOTIFIER_CURRENCY_TICKER=XLM
+COIN_NOTIFIER_CURRENCY_DIGITS_AFTER_DECIMAL=7
+COIN_NOTIFIER_CURRENCY_CONFIRMATIONS=1
+
+
+STELLAR_HORIZON_HOST=https://horizon.stellar.org
+STELLAR_HORIZON_PORT=443
+#STELLAR_HORIZON_HOST=192.168.88.168
+#STELLAR_HORIZON_PORT=8084
+STELLAR_NODEJS_HOST=192.168.88.168
+STELLAR_NODEJS_PORT=8001
+```
+после "composer install" заполнить файл /node_js_component/config.json
+```
+{
+  "base_ticker": "XLM",
+  "port": 8001,
+  "host": "192.168.88.168",
+  "horizon": "https://192.168.88.168:8084"
+}
+```
+и стартонуть контейнер с NodeJs модулем
+
+из имеющихся проблем на данной конкретной ноде:
+	- есть история только за последние 5 дней и нет возможности "отмотать её в прошлое" (а она нужна)
+	- нет возможности загрузить список ассетов (curl "http://192.168.88.168:8084/assets")
+	
+	
+p.s. IP 192.168.88.168 - это моя локальная машина, необходимо заменить на соответствующий ноде или бирже IP
+
+
+
+
+
+
